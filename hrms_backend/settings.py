@@ -7,6 +7,7 @@ import os
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 from decouple import Csv, config
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="insecure-dev-key-change-me")
@@ -81,20 +82,40 @@ WSGI_APPLICATION = 'hrms_backend.wsgi.application'
 
 
 # Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME", default="hrms_lite"),
-        "USER": config("DB_USER", default="postgres"),
-        "PASSWORD": config("DB_PASSWORD", default="54321"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
-        "ATOMIC_REQUESTS": True,
-        "OPTIONS": {
-            "options": "-c search_path=hrms,public",
+
+DATABASE_URL = config("DATABASE_URL", default=None)
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    }
+else:
+    # fallback for local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME", default="hrms_lite"),
+            "USER": config("DB_USER", default="postgres"),
+            "PASSWORD": config("DB_PASSWORD", default="54321"),
+            "HOST": config("DB_HOST", default="localhost"),
+            "PORT": config("DB_PORT", default="5432"),
         }
     }
-}
+    
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": config("DB_NAME", default="hrms_lite"),
+#         "USER": config("DB_USER", default="postgres"),
+#         "PASSWORD": config("DB_PASSWORD", default="54321"),
+#         "HOST": config("DB_HOST", default="localhost"),
+#         "PORT": config("DB_PORT", default="5432"),
+#         "ATOMIC_REQUESTS": True,
+#         "OPTIONS": {
+#             "options": "-c search_path=hrms,public",
+#         }
+#     }
+# }
 
 
 REST_FRAMEWORK = {
